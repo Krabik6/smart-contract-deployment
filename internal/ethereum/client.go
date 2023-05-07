@@ -89,10 +89,12 @@ func NewAuth(privateKeyHex string, client *ethclient.Client) (*bind.TransactOpts
 		log.Fatal(err)
 	}
 
+	fmt.Printf("gasPrice: %v\n", gasPrice)
+
 	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(0)     // in wei
-	auth.GasLimit = uint64(300000) // in units
+	auth.Value = big.NewInt(0) // in wei
 	auth.GasPrice = gasPrice
+	auth.GasLimit = uint64(1000000) // уменьшить значение газа до 1 миллиона
 
 	return auth, nil
 }
