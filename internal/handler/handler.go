@@ -24,11 +24,20 @@ func NewHandler(deployer Deployer, compiler Compiler) *Handler {
 }
 
 // setup router
-func (h *Handler) SetupRouter() *gin.Engine {
+func (h *Handler) InitRouts() *gin.Engine {
 	router := gin.Default()
-	router.POST("/deploy", h.deploy)
-	router.GET("/abi", h.getABI)
-	router.GET("/bytecode", h.getBytecode)
-	router.GET("/abiBytecode", h.getABIAndBytecode)
+
+	contractRoutes := router.Group("/contract")
+	{
+		contractRoutes.POST("/deploy", h.deploy)
+		contractRoutes.POST("/abi", h.getABI)
+		contractRoutes.POST("/bytecode", h.getBytecode)
+		contractRoutes.POST("/verify", h.verify)
+		contractRoutes.POST("/estimate-gas")
+
+	}
+
+	//todo eth_estimateGas
+
 	return router
 }

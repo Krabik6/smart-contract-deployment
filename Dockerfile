@@ -3,7 +3,7 @@ FROM golang:latest
 # Update the package list and install Solidity
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    add-apt-repository -y ppa:ethereum/ethereum && \
+    add-apt-repository -y ppa:eth/eth && \
     apt-get update && \
     apt-get install -y solc
 

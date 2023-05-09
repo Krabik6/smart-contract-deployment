@@ -15,9 +15,14 @@ type EnvConfig struct {
 	Url        string `env:"URL"`
 }
 
+type Server struct {
+	Port string `yaml:"port"`
+}
+
 type Config struct {
 	AppConfig
 	EnvConfig
+	Server
 }
 
 func Load() (*Config, error) {
@@ -29,6 +34,11 @@ func Load() (*Config, error) {
 
 	var appConfig AppConfig
 	if err := viper.UnmarshalKey("app", &appConfig); err != nil {
+		return nil, err
+	}
+
+	var srvConfig Server
+	if err := viper.UnmarshalKey("server", &srvConfig); err != nil {
 		return nil, err
 	}
 
@@ -44,6 +54,7 @@ func Load() (*Config, error) {
 	config := &Config{
 		AppConfig: appConfig,
 		EnvConfig: envConfig,
+		Server:    srvConfig,
 	}
 	return config, nil
 }
