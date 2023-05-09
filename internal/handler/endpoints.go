@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/Krabik6/smart-contract-deployment/internal/verify"
 	"github.com/Krabik6/smart-contract-deployment/pkg/api"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -76,7 +77,7 @@ func (h *Handler) estimateGas(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	gas, err := h.Deployer.EstimateGas(req.SourceCode, req.ConstructorArguments)
+	gas, err := h.Deployer.EstimateGas(req.SourceCode, req.Optimize, req.Runs, req.ConstructorArguments)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -98,4 +99,52 @@ func (h *Handler) verify(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"result": "ok"})
+}
+
+// encodeConstructorArgs
+func (h *Handler) encodeConstructorArgs(c *gin.Context) {
+	var req api.EncodeConstructorArgsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	var args []interface{}
+	if len(req.Arguments) > 0 {
+		if err := json.Unmarshal(req.Arguments, &args); err != nil {
+			c.JSON(400, gin.H{"error": "failed to parse ConstructorArguments"})
+			return
+		}
+	}
+
+	encoded, err := h.Compiler.EncodeConstructorArgs(req.SourceCode, args...)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"encoded": hexutil.Encode(encoded)})
+}
+
+// encodeFunctionCall
+func (h *Handler) encodeFunctionCall(c *gin.Context) {
+	var req api.EncodeFunctionCallRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	var args []interface{}
+	if len(req.Arguments) > 0 {
+		if err := json.Unmarshal(req.Arguments, &args); err != nil {
+			c.JSON(400, gin.H{"error": "failed to parse ConstructorArguments"})
+			return
+		}
+	}
+
+	encoded, err := h.Compiler.EncodeFunctionCall(req.SourceCode, req.FunctionName, args...)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"encoded": hexutil.Encode(encoded)})
 }

@@ -42,6 +42,16 @@ func (c *Compiler) GetAbi(sourceCode string) (abi.ABI, error) {
 		return abi.ABI{}, fmt.Errorf("failed to find GetAbi in output: %v", outputString)
 	}
 	abiString := outputString[abiStartIndex:]
+	abiJSON, err := c.GetAbiFromString(abiString)
+	if err != nil {
+		return abi.ABI{}, fmt.Errorf("failed to decode GetAbi: %v", err)
+	}
+
+	return abiJSON, nil
+}
+
+// convert abi format string to abi.ABI
+func (c *Compiler) GetAbiFromString(abiString string) (abi.ABI, error) {
 	abiBytes := []byte(abiString)
 
 	// декодируем GetAbi из байтов

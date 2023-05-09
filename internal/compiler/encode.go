@@ -2,19 +2,30 @@ package compiler
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 
-func EncodeConstructorArgs(abiJSON abi.ABI, args ...interface{}) ([]byte, error) {
-	encodedArgs, err := abiJSON.Pack("", args...)
+func (c *Compiler) EncodeConstructorArgs(sourceCode string, args ...interface{}) ([]byte, error) {
+	abiJSON, err := c.GetAbi(sourceCode)
+	parsedArgs, err := c.ConvertAndCheckArgs(args, &abiJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert and check constructor arguments: %v", err)
+	}
+
+	encodedArgs, err := abiJSON.Pack("", parsedArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode constructor arguments: %v", err)
 	}
 	return encodedArgs, nil
 }
 
-func EncodeFunctionCall(abiJSON abi.ABI, functionName string, args ...interface{}) ([]byte, error) {
-	encodedArgs, err := abiJSON.Pack(functionName, args...)
+func (c *Compiler) EncodeFunctionCall(sourceCode string, functionName string, args ...interface{}) ([]byte, error) {
+	abiJSON, err := c.GetAbi(sourceCode)
+	parsedArgs, err := c.ConvertAndCheckArgs(args, &abiJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert and check constructor arguments: %v", err)
+	}
+
+	encodedArgs, err := abiJSON.Pack(functionName, parsedArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode function arguments: %v", err)
 	}

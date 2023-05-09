@@ -25,3 +25,14 @@ type VerifyRequest struct {
 	ContractName         string          `json:"contract_name"`
 	ConstructorArguments json.RawMessage `json:"constructor_arguments"`
 }
+
+type EncodeFunctionCallRequest struct {
+	SourceCode   string          `json:"source_code"`
+	FunctionName string          `json:"function_name"`
+	Arguments    json.RawMessage `json:"arguments"`
+}
+
+type EncodeConstructorArgsRequest struct {
+	SourceCode string          `json:"source_code"`
+	Arguments  json.RawMessage `json:"arguments"`
+}

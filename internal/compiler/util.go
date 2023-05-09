@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func ConvertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interface{}, error) {
+func (c *Compiler) ConvertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interface{}, error) {
 	newArgs := make([]interface{}, len(args))
 	for i := 0; i < len(args); i++ {
 		log.Println(reflect.TypeOf(args[i]), "type arg ", i)

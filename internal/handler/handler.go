@@ -34,6 +34,8 @@ func (h *Handler) InitRouts() *gin.Engine {
 		contractRoutes.POST("/bytecode", h.getBytecode)
 		contractRoutes.POST("/verify", h.verify)
 		contractRoutes.POST("/estimate-gas")
+		contractRoutes.POST("/encode-function-call", h.encodeFunctionCall)
+		contractRoutes.POST("/encode-constructor-args", h.encodeConstructorArgs)
 
 	}
 
