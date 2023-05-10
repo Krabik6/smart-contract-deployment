@@ -17,3 +17,8 @@ type Compiler interface {
 	EncodeFunctionCall(sourceCode string, functionName string, args ...interface{}) ([]byte, error)
 	GetAbiFromString(abiString string) (abi.ABI, error)
 }
+
+// Verifier is the interface that wraps the Verify method.
+type Verifier interface {
+	Verify(contractAddress, sourceCode, contractName, licenseType, compilerversion string, optimize bool, runs int, constructorArguments []interface{}) error
+}

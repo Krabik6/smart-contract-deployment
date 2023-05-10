@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/Krabik6/smart-contract-deployment/internal/verify"
+	"fmt"
 	"github.com/Krabik6/smart-contract-deployment/pkg/api"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/gin-gonic/gin"
@@ -93,7 +93,15 @@ func (h *Handler) verify(c *gin.Context) {
 		return
 	}
 
-	err := verify.Verify(req.SourceCode, req.ContractAddress, req.ContractName, string(req.ConstructorArguments))
+	var args []interface{}
+	if len(req.ConstructorArguments) > 0 {
+		if err := json.Unmarshal(req.ConstructorArguments, &args); err != nil {
+			c.JSON(400, gin.H{"error": "failed to parse ConstructorArguments"})
+			return
+		}
+	}
+	fmt.Printf("Arguments: %v\n", args)
+	err := h.Verifier.Verify(req.ContractAddress, req.SourceCode, req.ContractName, req.LicenseType, req.Compilerversion, req.Optimize, req.Runs, args)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

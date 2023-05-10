@@ -7,6 +7,7 @@ import (
 	"github.com/Krabik6/smart-contract-deployment/internal/deployer"
 	"github.com/Krabik6/smart-contract-deployment/internal/eth"
 	"github.com/Krabik6/smart-contract-deployment/internal/handler"
+	"github.com/Krabik6/smart-contract-deployment/internal/verify"
 	"os"
 )
 
@@ -27,7 +28,8 @@ func main() {
 	}
 	compilers := compiler.NewCompiler(workDir, cfg.AppConfig.Image)
 	deployers := deployer.NewDeployer(eth, compilers)
-	handlers := handler.NewHandler(deployers, compilers)
+	verifiers := verify.NewVerifier(compilers)
+	handlers := handler.NewHandler(deployers, compilers, verifiers)
 
 	srv := apiserver.NewServer()
 
@@ -74,4 +76,4 @@ func main() {
 
 }
 
-//docker run -v ${pwd}:/contract ethereum/solc:stable --abi --bin -o /contract/artifacts ./contract/Storage.sol --overwrite
+//docker run -v ${pwd}:/contract ethereum/solc:stable --abi --bin -o /contract/artifacts ./contract/YourContract.sol --overwrite

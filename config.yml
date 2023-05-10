@@ -1,4 +1,4 @@
 app:
-  image: "ethereum/solc:stable"
+  image: "ethereum/solc:0.8.19"
 server:
   port: "8080"

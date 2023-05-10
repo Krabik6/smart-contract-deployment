@@ -19,11 +19,17 @@ type BytecodeRequest struct {
 	Runs       int    `json:"runs"`
 }
 
+//Verify(contractAddress, sourceCode, contractName, constructorArguments, licenseType, compilerversion string, optimize bool, runs int) error
+
 type VerifyRequest struct {
-	SourceCode           string          `json:"source_code"`
 	ContractAddress      string          `json:"contract_address"`
+	SourceCode           string          `json:"source_code"`
 	ContractName         string          `json:"contract_name"`
 	ConstructorArguments json.RawMessage `json:"constructor_arguments"`
+	LicenseType          string          `json:"license_type"`
+	Compilerversion      string          `json:"compilerversion"`
+	Optimize             bool            `json:"optimize"`
+	Runs                 int             `json:"runs"`
 }
 
 type EncodeFunctionCallRequest struct {

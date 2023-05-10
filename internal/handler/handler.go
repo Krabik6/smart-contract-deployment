@@ -14,12 +14,14 @@ import "github.com/gin-gonic/gin"
 type Handler struct {
 	Deployer Deployer
 	Compiler Compiler
+	Verifier Verifier
 }
 
-func NewHandler(deployer Deployer, compiler Compiler) *Handler {
+func NewHandler(deployer Deployer, compiler Compiler, verifier Verifier) *Handler {
 	return &Handler{
 		Deployer: deployer,
 		Compiler: compiler,
+		Verifier: verifier,
 	}
 }
 
