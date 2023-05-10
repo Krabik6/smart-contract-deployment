@@ -3,7 +3,8 @@ package verify
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
@@ -24,10 +25,7 @@ func NewVerifier(compiler Compiler) *Verifier {
 
 // Compiler is the interface that wraps the Compile method.
 type Compiler interface {
-	//ConvertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interface{}, error)
 	EncodeConstructorArgs(sourceCode string, args ...interface{}) ([]byte, error)
-	EncodeFunctionCall(sourceCode string, functionName string, args ...interface{}) ([]byte, error)
-	GetAbiFromString(abiString string) (abi.ABI, error)
 }
 
 func BoolToString(b bool) string {
@@ -48,6 +46,11 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 	log.Println("optimize:", optimize)
 	log.Println("runs:", runs)
 	log.Println("constructorArguments:", constructorArguments)
+	//constructorArguments type and type of each element
+	log.Println("constructorArguments type:", fmt.Sprintf("%T", constructorArguments))
+	for i, v := range constructorArguments {
+		log.Println("constructorArguments element type:", fmt.Sprintf("%T", v), "element:", i)
+	}
 
 	params := map[string]string{
 		"apikey":           "AFEMDPHAWXPHKI8SQJK9AS77UIAZN9NGCN",
@@ -70,12 +73,15 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 
 	// if constructorArguments len > 0
 	if len(constructorArguments) != 0 {
-		args, err := v.Compiler.EncodeConstructorArgs(sourceCode, constructorArguments)
+		args, err := v.Compiler.EncodeConstructorArgs(sourceCode, []interface{}{uint(8712354)}...)
 		if err != nil {
 			return err
 		}
-		strArgs := string(args)
-		params["constructorarguments"] = strArgs
+		log.Println("args:", args)
+		log.Println("encode args:", hexutil.Encode(args))
+		//[]interface{} to string
+
+		params["constructorarguments"] = hexutil.Encode(args)
 	}
 
 	formData := url.Values{}
@@ -100,10 +106,6 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 		req.Header.Set(k, v)
 	}
 
-	//print req body
-	// print and parse to readable human format
-	log.Printf("Request: Method=%s, URL=%s, Headers=%v, Body=%s", req.Method, req.URL.String(), req.Header, reqBody.String())
-
 	res, err := client.Do(req)
 	if err != nil {
 		debug.PrintStack()
@@ -121,6 +123,15 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 	if status, ok := result["status"].(string); !ok || status != "1" {
 		return errors.New(result["result"].(string))
 	}
+	log.Println("result:", result["result"])
+	log.Println("message:", result["message"])
+	log.Println("status:", result["status"])
 
 	return nil
 }
+
+//{
+//"status": "1",
+//"message": "OK",
+//"result": "d9vrjsemlffmhmwmxpuhs1adbvtth2dszui52rergfjzwgxzvt"
+//}

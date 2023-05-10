@@ -10,10 +10,6 @@ import (
 
 func (c *Compiler) ConvertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interface{}, error) {
 	newArgs := make([]interface{}, len(args))
-	// check args
-	if len(args) != len(contractAbiJson.Constructor.Inputs) {
-		return nil, errors.New("wrong number of arguments")
-	}
 	for i := 0; i < len(args); i++ {
 		log.Println(reflect.TypeOf(args[i]), "type arg ", i)
 		abiArg := contractAbiJson.Constructor.Inputs[i]
