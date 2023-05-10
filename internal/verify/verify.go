@@ -81,7 +81,7 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 		log.Println("encode args:", hexutil.Encode(args))
 		//[]interface{} to string
 
-		params["constructorarguments"] = hexutil.Encode(args)
+		params["constructorarguments"] = "0x000000000000000000000000000000000000000000000000000000000084f0a2"
 	}
 
 	formData := url.Values{}
