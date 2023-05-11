@@ -3,15 +3,28 @@ package main
 import (
 	"github.com/Krabik6/smart-contract-deployment/internal/apiserver"
 	"github.com/Krabik6/smart-contract-deployment/internal/compiler"
+	compilerjson "github.com/Krabik6/smart-contract-deployment/internal/compilerJson"
 	"github.com/Krabik6/smart-contract-deployment/internal/config"
 	"github.com/Krabik6/smart-contract-deployment/internal/deployer"
 	"github.com/Krabik6/smart-contract-deployment/internal/eth"
 	"github.com/Krabik6/smart-contract-deployment/internal/handler"
 	"github.com/Krabik6/smart-contract-deployment/internal/verify"
+	"log"
 	"os"
+	"time"
 )
 
 func main() {
+
+	mainSolPath := "./smart_contracts/smart.sol"
+	outputPath := "input.json"
+
+	compilerjson.WriteJSONInput(mainSolPath, outputPath)
+	log.Println("Creating input.json file...")
+
+	//wait 50 seconds and panic
+	time.Sleep(50 * time.Second)
+	panic("panic")
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -75,5 +88,3 @@ func main() {
 	//fmt.Println(addr)
 
 }
-
-//docker run -v ${pwd}:/contract ethereum/solc:stable --abi --bin -o /contract/artifacts ./contract/YourContract.sol --overwrite
