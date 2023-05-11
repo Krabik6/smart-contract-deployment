@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
@@ -63,12 +62,7 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 		if err != nil {
 			return err
 		}
-		log.Println("args:", args)
-		log.Println("encode args:", hexutil.Encode(args))
-		// encode args to hex but without 0x
-
 		hexArgsWithout0x := hex.EncodeToString(args)
-
 		params["constructorArguements"] = hexArgsWithout0x
 	}
 
