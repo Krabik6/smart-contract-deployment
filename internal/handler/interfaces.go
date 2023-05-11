@@ -20,5 +20,5 @@ type Compiler interface {
 
 // Verifier is the interface that wraps the Verify method.
 type Verifier interface {
-	Verify(contractAddress, sourceCode, contractName, licenseType, compilerversion string, optimize bool, runs int, constructorArguments []interface{}) error
+	Verify(contractAddress, sourceCode, contractName, licenseType, compilerversion string, optimize bool, runs int, constructorArguments ...interface{}) error
 }

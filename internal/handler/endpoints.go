@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/Krabik6/smart-contract-deployment/pkg/api"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/gin-gonic/gin"
@@ -100,8 +99,8 @@ func (h *Handler) verify(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Printf("Arguments: %v\n", args)
-	err := h.Verifier.Verify(req.ContractAddress, req.SourceCode, req.ContractName, req.LicenseType, req.Compilerversion, req.Optimize, req.Runs, args)
+
+	err := h.Verifier.Verify(req.ContractAddress, req.SourceCode, req.ContractName, req.LicenseType, req.Compilerversion, req.Optimize, req.Runs, args...)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

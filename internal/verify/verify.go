@@ -2,8 +2,8 @@ package verify
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	"log"
@@ -35,22 +35,8 @@ func BoolToString(b bool) string {
 	return "0"
 }
 
-func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType, compilerversion string, optimize bool, runs int, constructorArguments []interface{}) error {
+func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType, compilerversion string, optimize bool, runs int, constructorArguments ...interface{}) error {
 	optimizeStr := BoolToString(optimize)
-	// print all args verify function
-	log.Println("contractAddress:", contractAddress)
-	log.Println("sourceCode:", sourceCode)
-	log.Println("contractName:", contractName)
-	log.Println("licenseType:", licenseType)
-	log.Println("compilerversion:", compilerversion)
-	log.Println("optimize:", optimize)
-	log.Println("runs:", runs)
-	log.Println("constructorArguments:", constructorArguments)
-	//constructorArguments type and type of each element
-	log.Println("constructorArguments type:", fmt.Sprintf("%T", constructorArguments))
-	for i, v := range constructorArguments {
-		log.Println("constructorArguments element type:", fmt.Sprintf("%T", v), "element:", i)
-	}
 
 	params := map[string]string{
 		"apikey":           "AFEMDPHAWXPHKI8SQJK9AS77UIAZN9NGCN",
@@ -73,15 +59,17 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 
 	// if constructorArguments len > 0
 	if len(constructorArguments) != 0 {
-		args, err := v.Compiler.EncodeConstructorArgs(sourceCode, []interface{}{uint(8712354)}...)
+		args, err := v.Compiler.EncodeConstructorArgs(sourceCode, constructorArguments...)
 		if err != nil {
 			return err
 		}
 		log.Println("args:", args)
 		log.Println("encode args:", hexutil.Encode(args))
-		//[]interface{} to string
+		// encode args to hex but without 0x
 
-		params["constructorarguments"] = "0x000000000000000000000000000000000000000000000000000000000084f0a2"
+		hexArgsWithout0x := hex.EncodeToString(args)
+
+		params["constructorArguements"] = hexArgsWithout0x
 	}
 
 	formData := url.Values{}
@@ -105,6 +93,10 @@ func (v *Verifier) Verify(contractAddress, sourceCode, contractName, licenseType
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
+	// print request body for debug
+	log.Println("request body:", reqBody)
+	// print request body constructorArguments for debug
+	log.Println("request body constructorArguments:", params["constructorArguements"])
 
 	res, err := client.Do(req)
 	if err != nil {

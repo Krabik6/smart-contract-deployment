@@ -1,16 +1,30 @@
-# Binaries for programs and plugins
+# Игнорирование файлов бинарников
 *.exe
-*.exe~
 *.dll
 *.so
 *.dylib
-.idea
 
-# Test binary, built with `go test -c`
+# Игнорирование файлов пакета go
+/bin/
+/pkg/
+/vendor/
+
+# Игнорирование файлов конфигурации IDE
+.idea/
+.vscode/
+*.swp
+
+# Игнорирование файлов тестов и покрытия кода
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+*.cover
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Игнорирование файлов кеша
+*.cache
+*.log
+
+# Игнорирование файла зависимостей Go
+go.sum
+
+# Игнорирование файла среды окружения
+.env
