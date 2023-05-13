@@ -19,11 +19,17 @@ func main() {
 	//}
 	//log.Println(abi)
 
-	bytecode, err := compilersjson.GetBytecode("", "input.json")
+	//bytecode, err := compilersjson.GetBytecode("", "input.json")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//log.Println(bytecode)
+
+	abi, err := compilersjson.GetAbi("")
 	if err != nil {
 		panic(err)
 	}
-	log.Println(bytecode)
+	log.Println(abi)
 	//mainSolPath := "./smart_contracts/smart.sol"
 	//outputPath := "input.json"
 	//
