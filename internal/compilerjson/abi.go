@@ -7,15 +7,19 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/pkg/errors"
-	"log"
 	"os/exec"
 )
 
-func (c *Compiler) GetAbi(sourceCode string) (abi.ABI, error) {
-	cmd := exec.Command("docker", "run", "-i", "--rm", "-v", fmt.Sprintf("%s:/source", c.WorkDir), c.Image, "--standard-json", "/source/input.json")
+func (c *Compiler) GetAbi(inputJSON []byte) (abi.ABI, error) {
+	cmd := exec.Command("docker", "run", "-i", "--rm", "-v", fmt.Sprintf("%s:/source", c.WorkDir), c.Image, "--standard-json")
 
 	var output bytes.Buffer
 	cmd.Stdout = &output
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return abi.ABI{}, fmt.Errorf("failed to create stdin pipe: %v", err)
+	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
@@ -25,6 +29,11 @@ func (c *Compiler) GetAbi(sourceCode string) (abi.ABI, error) {
 	if err := cmd.Start(); err != nil {
 		return abi.ABI{}, fmt.Errorf("failed to start Solidity compiler: %v", err)
 	}
+
+	go func() {
+		defer stdin.Close()
+		_, err = stdin.Write(inputJSON)
+	}()
 
 	go func() {
 		scanner := bufio.NewScanner(stderr)
@@ -58,37 +67,18 @@ func (c *Compiler) GetAbi(sourceCode string) (abi.ABI, error) {
 	// For example:
 	//log.Println(solcOutput)
 	abiInterface := solcOutput.Contracts["smart_contracts/smart.sol"]["PublicStorageFuck"].Abi
-	log.Println(abiInterface)
-	//
-	abiString, err := interfaceToString(abiInterface)
+
+	// Преобразование abiInterface в []byte
+	abiBytes, err := json.Marshal(abiInterface)
 	if err != nil {
-		return abi.ABI{}, err
+		return abi.ABI{}, fmt.Errorf("failed to convert abiInterface to bytes: %v", err)
 	}
 
-	abi, err := c.GetAbiFromString(abiString)
-
-	return abi, nil
-}
-
-// convert abi format string to abi.ABI
-func (c *Compiler) GetAbiFromString(abiString string) (abi.ABI, error) {
-	abiBytes := []byte(abiString)
-
-	// декодируем GetAbi из байтов
+	// Декодирование ABI из []byte
 	abiJSON, err := abi.JSON(bytes.NewReader(abiBytes))
 	if err != nil {
-		return abi.ABI{}, fmt.Errorf("failed to decode GetAbi: %v", err)
+		return abi.ABI{}, fmt.Errorf("failed to decode ABI: %v", err)
 	}
 
 	return abiJSON, nil
-}
-
-func interfaceToString(value interface{}) (string, error) {
-	// Check if the value is actually a string
-	if str, ok := value.(string); ok {
-		return str, nil
-	}
-
-	// If it's not a string, convert it using the fmt package
-	return fmt.Sprintf("%v", value), nil
 }

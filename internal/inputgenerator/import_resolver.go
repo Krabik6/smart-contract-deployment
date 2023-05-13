@@ -1,6 +1,7 @@
 package inputgenerator
 
 import (
+	"log"
 	"path/filepath"
 	"regexp"
 )
@@ -12,7 +13,8 @@ func (c *Compiler) findAndAddImports(content string, directory string, sources m
 
 	for _, match := range matches {
 		// Resolve the path of the imported file relative to the directory of the current file
-		relativePath := filepath.Join(directory, match[1])
+		log.Println("match[1]:", match[1])
+		relativePath := match[1]
 		if _, exists := c.Sources[relativePath]; !exists {
 			content, err := c.readSolidityFile(relativePath)
 			if err != nil {

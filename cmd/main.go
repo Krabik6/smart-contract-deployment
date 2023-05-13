@@ -2,22 +2,13 @@ package main
 
 import (
 	"github.com/Krabik6/smart-contract-deployment/internal/compilerjson"
+	"github.com/Krabik6/smart-contract-deployment/internal/inputgenerator"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
-	workDir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	compilersjson := compilerjson.NewCompiler(workDir, "ethereum/solc:0.8.19")
-	//abi, err := compilersjson.GetAbi("./smart_contracts/smart.sol")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//log.Println(abi)
 
 	//bytecode, err := compilersjson.GetBytecode("", "input.json")
 	//if err != nil {
@@ -25,24 +16,36 @@ func main() {
 	//}
 	//log.Println(bytecode)
 
-	abi, err := compilersjson.GetAbi("")
+	//abi, err := compilersjson.GetAbi("")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//log.Println(abi)
+	mainSolPath := "smart_contracts/smart.sol"
+
+	c := inputgenerator.NewCompiler()
+	jsonInput, err := c.GenerateJSONInput(mainSolPath, true, 200)
 	if err != nil {
 		panic(err)
 	}
-	log.Println(abi)
-	//mainSolPath := "./smart_contracts/smart.sol"
-	//outputPath := "input.json"
+	log.Println(jsonInput)
+
+	workDir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
 	//
-	//c := inputgenerator.NewCompiler()
-	//err := c.WriteJSONInput(mainSolPath, outputPath, true, 200)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//log.Println("Creating input.json file...")
-	//
-	////wait 50 seconds and panic
-	//time.Sleep(50 * time.Second)
-	//panic("panic")
+	compilersjson := compilerjson.NewCompiler(workDir, "ethereum/solc:0.8.19")
+	abi, err := compilersjson.GetAbi(jsonInput)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("abi: ", abi)
+
+	//wait 50 seconds and panic
+	time.Sleep(50 * time.Second)
+
+	panic("panic")
 
 	//cfg, err := config.Load()
 	//if err != nil {

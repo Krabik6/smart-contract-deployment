@@ -2,7 +2,6 @@ package inputgenerator
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -39,7 +38,7 @@ func NewCompiler() *Compiler {
 	}
 }
 
-func (c *Compiler) WriteJSONInput(mainSolPath, outputPath string, optimize bool, optimizeRuns int) error {
+func (c *Compiler) GenerateJSONInput(mainSolPath string, optimize bool, optimizeRuns int) ([]byte, error) {
 	// Set the optimize option and optimization runs
 	c.Settings.Optimizer.Enabled = optimize
 	c.Settings.Optimizer.Runs = optimizeRuns
@@ -47,23 +46,23 @@ func (c *Compiler) WriteJSONInput(mainSolPath, outputPath string, optimize bool,
 	// Read the main file
 	mainContent, err := c.readSolidityFile(mainSolPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	mainDirectory := filepath.Dir(mainSolPath)
-	mainSolPath = strings.ReplaceAll(mainSolPath, "\\", "/") // Замена всех обратных слешей на прямые слеши
+	mainSolPath = strings.ReplaceAll(mainSolPath, "\\", "/") // Replace all backslashes with forward slashes
 	c.Sources[mainSolPath] = Source{Content: mainContent}
 
 	// Find and read imports
 	err = c.findAndAddImports(mainContent, mainDirectory, c.Sources)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	jsonData, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
-		return err
+		return nil, err
 	}
-	err = os.WriteFile(outputPath, jsonData, 0644)
-	return err
+
+	return jsonData, nil
 }
