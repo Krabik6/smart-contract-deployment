@@ -1,54 +1,66 @@
 package main
 
 import (
-	"github.com/Krabik6/smart-contract-deployment/internal/apiserver"
-	"github.com/Krabik6/smart-contract-deployment/internal/compiler"
-	compilerjson "github.com/Krabik6/smart-contract-deployment/internal/compilerJson"
-	"github.com/Krabik6/smart-contract-deployment/internal/config"
-	"github.com/Krabik6/smart-contract-deployment/internal/deployer"
-	"github.com/Krabik6/smart-contract-deployment/internal/eth"
-	"github.com/Krabik6/smart-contract-deployment/internal/handler"
-	"github.com/Krabik6/smart-contract-deployment/internal/verify"
+	"github.com/Krabik6/smart-contract-deployment/internal/compilerjson"
 	"log"
 	"os"
-	"time"
 )
 
 func main() {
-
-	mainSolPath := "./smart_contracts/smart.sol"
-	outputPath := "input.json"
-
-	compilerjson.WriteJSONInput(mainSolPath, outputPath)
-	log.Println("Creating input.json file...")
-
-	//wait 50 seconds and panic
-	time.Sleep(50 * time.Second)
-	panic("panic")
-
-	cfg, err := config.Load()
-	if err != nil {
-		panic(err)
-	}
-
 	workDir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	eth, err := eth.NewEthereumClient(cfg.EnvConfig.Url, cfg.EnvConfig.PrivateKey)
+
+	compilersjson := compilerjson.NewCompiler(workDir, "ethereum/solc:0.8.19")
+	//abi, err := compilersjson.GetAbi("./smart_contracts/smart.sol")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//log.Println(abi)
+
+	bytecode, err := compilersjson.GetBytecode("", "input.json")
 	if err != nil {
 		panic(err)
 	}
-	compilers := compiler.NewCompiler(workDir, cfg.AppConfig.Image)
-	deployers := deployer.NewDeployer(eth, compilers)
-	verifiers := verify.NewVerifier(compilers)
-	handlers := handler.NewHandler(deployers, compilers, verifiers)
+	log.Println(bytecode)
+	//mainSolPath := "./smart_contracts/smart.sol"
+	//outputPath := "input.json"
+	//
+	//c := inputgenerator.NewCompiler()
+	//err := c.WriteJSONInput(mainSolPath, outputPath, true, 200)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//log.Println("Creating input.json file...")
+	//
+	////wait 50 seconds and panic
+	//time.Sleep(50 * time.Second)
+	//panic("panic")
 
-	srv := apiserver.NewServer()
-
-	if err := srv.Run(cfg.Server.Port, handlers.InitRouts()); err != nil {
-		panic(err)
-	}
+	//cfg, err := config.Load()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//workDir, err := os.Getwd()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//eth, err := eth.NewEthereumClient(cfg.EnvConfig.Url, cfg.EnvConfig.PrivateKey)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//compilers := compiler.NewCompiler(workDir, cfg.AppConfig.Image)
+	//deployers := deployer.NewDeployer(eth, compilers)
+	//verifiers := verify.NewVerifier(compilers)
+	//handlers := handler.NewHandler(deployers, compilers, verifiers)
+	//
+	//srv := apiserver.NewServer()
+	//
+	//if err := srv.Run(cfg.Server.Port, handlers.InitRouts()); err != nil {
+	//	panic(err)
+	//}
 
 	//fmt.Println(handlers)
 	//	sourceCode := `// SPDX-License-Identifier: GPL-3.0

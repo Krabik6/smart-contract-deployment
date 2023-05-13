@@ -1,0 +1,29 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "./smart_contracts/smart.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0\r\npragma solidity 0.8.19;\r\nimport \"folderTwo/second.sol\";\r\n\r\ncontract PublicStorageFuck is Second {\r\n    mapping(address =\u003e mapping(string =\u003e string)) public Storage;\r\n    uint cost;\r\n    address payable owner;\r\n    constructor(uint _cost){\r\n        owner = payable(msg.sender);\r\n        cost = _cost + 11;\r\n\r\n    }\r\n\r\n    function saveData(string memory key, string memory value) public payable{\r\n        require(msg.value \u003e= cost, \"not enough shit\");\r\n        Storage[msg.sender][key] = value;\r\n        owner.transfer(msg.value);\r\n\r\n    }\r\n\r\n}"
+    },
+    "smart_contracts/folderTwo/second.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0\r\n\r\npragma solidity 0.8.19;\r\n\r\nimport \"third.sol\";\r\n\r\ncontract Second is third{\r\n    function add(uint num1, uint num2) public pure returns(uint){\r\n        return num1 + num2;\r\n    }\r\n\r\n}"
+    },
+    "smart_contracts/folderTwo/third.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\r\npragma solidity ^0.8.19;\r\n\r\ncontract third {\r\n    function get() public pure returns (string memory) {\r\n        return \"third\";\r\n    }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "outputSelection": {
+      "*": {
+        "*": [
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "abi"
+        ]
+      }
+    },
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    }
+  }
+}

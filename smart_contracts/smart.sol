@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.19;
-import "second.sol";
-
+import "smart_contracts/folderTwo/second.sol";
 contract PublicStorageFuck is Second {
     mapping(address => mapping(string => string)) public Storage;
     uint cost;
