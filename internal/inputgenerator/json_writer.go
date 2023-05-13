@@ -20,25 +20,25 @@ type Settings struct {
 	Optimizer       Optimizer                      `json:"optimizer,omitempty"`
 }
 
-type Compiler struct {
+type InputGenerator struct {
 	Language string            `json:"language"`
 	Sources  map[string]Source `json:"sources"`
 	Settings Settings          `json:"settings"`
 }
 
-func NewCompiler() *Compiler {
+func NewInputGenerator() *InputGenerator {
 	outputSelection := make(map[string]map[string][]string)
 	outputSelection["*"] = make(map[string][]string)
 	outputSelection["*"]["*"] = []string{"evm.bytecode", "evm.deployedBytecode", "abi"}
 
-	return &Compiler{
+	return &InputGenerator{
 		Language: "Solidity",
 		Sources:  make(map[string]Source),
 		Settings: Settings{OutputSelection: outputSelection},
 	}
 }
 
-func (c *Compiler) GenerateJSONInput(mainSolPath string, optimize bool, optimizeRuns int) ([]byte, error) {
+func (c *InputGenerator) GenerateJSONInput(mainSolPath string, optimize bool, optimizeRuns int) ([]byte, string, error) {
 	// Set the optimize option and optimization runs
 	c.Settings.Optimizer.Enabled = optimize
 	c.Settings.Optimizer.Runs = optimizeRuns
@@ -46,7 +46,7 @@ func (c *Compiler) GenerateJSONInput(mainSolPath string, optimize bool, optimize
 	// Read the main file
 	mainContent, err := c.readSolidityFile(mainSolPath)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	mainDirectory := filepath.Dir(mainSolPath)
@@ -56,13 +56,17 @@ func (c *Compiler) GenerateJSONInput(mainSolPath string, optimize bool, optimize
 	// Find and read imports
 	err = c.findAndAddImports(mainContent, mainDirectory, c.Sources)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	jsonData, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return jsonData, nil
+	// Get the main contract path and name based on smart contract code
+
+	mainContractPath := mainSolPath
+
+	return jsonData, mainContractPath, nil
 }

@@ -10,7 +10,7 @@ import (
 	"os/exec"
 )
 
-func (c *Compiler) GetAbi(inputJSON []byte) (abi.ABI, error) {
+func (c *Compiler) GetAbi(inputJSON []byte, contractPath, contractName string) (abi.ABI, error) {
 	cmd := exec.Command("docker", "run", "-i", "--rm", "-v", fmt.Sprintf("%s:/source", c.WorkDir), c.Image, "--standard-json")
 
 	var output bytes.Buffer
@@ -32,7 +32,7 @@ func (c *Compiler) GetAbi(inputJSON []byte) (abi.ABI, error) {
 
 	go func() {
 		defer stdin.Close()
-		_, err = stdin.Write(inputJSON)
+		_, _ = stdin.Write(inputJSON)
 	}()
 
 	go func() {
@@ -54,8 +54,6 @@ func (c *Compiler) GetAbi(inputJSON []byte) (abi.ABI, error) {
 		return abi.ABI{}, errors.New("no output from the Solidity compiler")
 	}
 
-	//log.Println("Output from the compiler:", outputString)
-
 	// parse output to json format in SolcOutput struct
 	var solcOutput SolcOutput
 	err = json.Unmarshal([]byte(outputString), &solcOutput)
@@ -63,18 +61,16 @@ func (c *Compiler) GetAbi(inputJSON []byte) (abi.ABI, error) {
 		return abi.ABI{}, fmt.Errorf("failed to parse compiler output: %v", err)
 	}
 
-	// Now you can access the data in your struct
-	// For example:
-	//log.Println(solcOutput)
-	abiInterface := solcOutput.Contracts["smart_contracts/smart.sol"]["PublicStorageFuck"].Abi
+	// Access the ABI of the first contract
+	abiInterface := solcOutput.Contracts[contractPath][contractName].Abi
 
-	// Преобразование abiInterface в []byte
+	// Convert abiInterface to []byte
 	abiBytes, err := json.Marshal(abiInterface)
 	if err != nil {
 		return abi.ABI{}, fmt.Errorf("failed to convert abiInterface to bytes: %v", err)
 	}
 
-	// Декодирование ABI из []byte
+	// Decode ABI from []byte
 	abiJSON, err := abi.JSON(bytes.NewReader(abiBytes))
 	if err != nil {
 		return abi.ABI{}, fmt.Errorf("failed to decode ABI: %v", err)

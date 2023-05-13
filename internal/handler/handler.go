@@ -12,16 +12,22 @@ import "github.com/gin-gonic/gin"
 //api endpoints like /deploy, /abi, /bytecode, /abiBytecode using gin framework
 
 type Handler struct {
-	Deployer Deployer
-	Compiler Compiler
-	Verifier Verifier
+	Deployer       Deployer
+	Compiler       Compiler
+	Verifier       Verifier
+	ArgsEncoder    ArgsEncoder
+	CompilerJson   CompilerJson
+	InputGenerator InputGenerator
 }
 
-func NewHandler(deployer Deployer, compiler Compiler, verifier Verifier) *Handler {
+func NewHandler(deployer Deployer, compiler Compiler, verifier Verifier, argsEncoder ArgsEncoder, compilerJson CompilerJson, inputGenerator InputGenerator) *Handler {
 	return &Handler{
-		Deployer: deployer,
-		Compiler: compiler,
-		Verifier: verifier,
+		Deployer:       deployer,
+		Compiler:       compiler,
+		Verifier:       verifier,
+		ArgsEncoder:    argsEncoder,
+		CompilerJson:   compilerJson,
+		InputGenerator: inputGenerator,
 	}
 }
 

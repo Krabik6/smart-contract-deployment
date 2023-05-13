@@ -15,26 +15,24 @@ import (
 	"reflect"
 )
 
-type Compiler interface {
-	GetBytecode(sourceCode string, optimize bool, runs int) ([]byte, error)
-	GetAbi(sourceCode string) (abi.ABI, error)
-}
+//type Compiler interface {
+//	GetBytecode(sourceCode string, optimize bool, runs int) ([]byte, error)
+//	GetAbi(sourceCode string) (abi.ABI, error)
+//}
 
 type Deployer struct {
 	Ethereum *eth.EthereumClient
-	Compiler
 }
 
-func NewDeployer(ethereum *eth.EthereumClient, compiler Compiler) *Deployer {
+func NewDeployer(ethereum *eth.EthereumClient) *Deployer {
 	return &Deployer{
 		Ethereum: ethereum,
-		Compiler: compiler,
 	}
 }
 
-func (d *Deployer) Deploy(sourceCode string, optimize bool, runs int, args ...interface{}) (string, error) {
+func (d *Deployer) Deploy(bytecode []byte, abi abi.ABI, args ...interface{}) (string, error) {
 	// Deploy the contract
-	address, tx, _, err := d.DeployWithArgs(sourceCode, optimize, runs, args...)
+	address, tx, _, err := d.DeployWithArgs(bytecode, abi, args...)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to deploy contract")
 	}
@@ -45,6 +43,7 @@ func (d *Deployer) Deploy(sourceCode string, optimize bool, runs int, args ...in
 	return address.Hex(), nil
 }
 
+// todo interface for convert and check args
 func convertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interface{}, error) {
 	for i := 0; i < len(args); i++ {
 		log.Println(reflect.TypeOf(args[i]), "type arg ", i)
@@ -72,19 +71,10 @@ func convertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interf
 	return args, nil
 }
 
-func (d *Deployer) DeployWithArgs(sourceCode string, optimize bool, runs int, args ...interface{}) (common.Address, *types.Transaction, *bind.BoundContract, error) {
+func (d *Deployer) DeployWithArgs(bytecode []byte, abi abi.ABI, args ...interface{}) (common.Address, *types.Transaction, *bind.BoundContract, error) {
 	auth := d.Ethereum.Auth     // auth is a pointer to a TransactOpts struct
 	client := d.Ethereum.Client // client is a pointer to an ethclient.Client struct
-	// Load the contract GetAbi
-	contractAbiJson, err := d.GetAbi(sourceCode)
-	if err != nil {
-		return common.Address{}, nil, nil, errors.Wrap(err, "failed to load contract GetAbi")
-	}
-	// Load GetBytecode
-	bytecode, err := d.GetBytecode(sourceCode, optimize, runs)
-	if err != nil {
-		return common.Address{}, nil, nil, errors.Wrap(err, "failed to load bytecode")
-	}
+
 	estimateGas, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
 		From:     auth.From,
 		To:       nil, // контракт еще не задеплоен
@@ -97,19 +87,20 @@ func (d *Deployer) DeployWithArgs(sourceCode string, optimize bool, runs int, ar
 
 	// Check if the contract expects arguments and set args to nil if none are expected
 	//check type of args
-
-	if len(args) == 1 && len(contractAbiJson.Constructor.Inputs) == 0 {
+	if len(args) == 1 && len(abi.Constructor.Inputs) == 0 {
 		args = nil
 		log.Println("No arguments expected")
 	}
 
-	convertedArgs, err := convertAndCheckArgs(args, &contractAbiJson)
+	convertedArgs, err := convertAndCheckArgs(args, &abi)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
+	//log.Print(bytecode)
+	//log.Print(abi)
 
 	// Deploy the contract
-	address, tx, instance, err := bind.DeployContract(auth, contractAbiJson, bytecode, client, convertedArgs...)
+	address, tx, instance, err := bind.DeployContract(auth, abi, bytecode, client, convertedArgs...)
 	if err != nil {
 		return common.Address{}, nil, nil, errors.Wrap(err, "failed to deploy contract")
 	}
