@@ -3,19 +3,16 @@ package compilerjson
 import (
 	"bufio"
 	"bytes"
-	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"log"
 	"os/exec"
-	"regexp"
-	"strings"
 )
 
 func (c *Compiler) GetBytecode(sourceCode string, inputPath string) ([]byte, error) {
 	cmd := exec.Command("docker", "run", "-i", "--rm", "-v", fmt.Sprintf("%s:/source", c.WorkDir), "ethereum/solc:0.8.19", "--standard-json", "/source/input.json")
-	cmd.Stdin = strings.NewReader(sourceCode)
 
 	var output bytes.Buffer
 	cmd.Stdout = &output
@@ -50,24 +47,18 @@ func (c *Compiler) GetBytecode(sourceCode string, inputPath string) ([]byte, err
 
 	log.Println("Output from the compiler:", outputString)
 
-	// Ищем байткод с помощью регулярного выражения
-	re := regexp.MustCompile(`"object":"\s*([0-9a-fA-F]+)`)
-	matches := re.FindStringSubmatch(outputString)
-	if len(matches) < 2 {
-		return nil, errors.New("failed to find bytecode in the output")
+	// parse output to json format in SolcOutput struct
+	var solcOutput SolcOutput
+	err = json.Unmarshal([]byte(outputString), &solcOutput)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse compiler output: %v", err)
 	}
 
-	binString := strings.TrimSpace(matches[1])
-
-	binBytes := common.FromHex(binString)
-
-	if len(binBytes) == 0 {
-		fmt.Printf("Output string from the compiler: %s\n", outputString)
-		return nil, errors.New("bytecode is empty")
-	}
-
-	// binBytes to string
-	log.Println("Bytecode:", hex.EncodeToString(binBytes))
+	// Now you can access the data in your struct
+	// For example:
+	//log.Println(solcOutput)
+	bytecodeString := solcOutput.Contracts["smart_contracts/smart.sol"]["PublicStorageFuck"].Evm.Bytecode.Object
+	binBytes := common.FromHex(bytecodeString)
 
 	return binBytes, nil
 }
