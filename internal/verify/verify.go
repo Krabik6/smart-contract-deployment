@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"net/url"
+	"reflect"
 	"runtime/debug"
 	"strconv"
 )
@@ -55,7 +57,7 @@ type Params struct {
 	OptimizationUsed *bool   `json:"optimizationUsed,omitempty"`
 	Runs             *int    `json:"runs,omitempty"`
 	EVMVersion       *string `json:"evmversion,omitempty"`
-	LicenseType      *int    `json:"licenseType,omitempty"`
+	LicenseType      int     `json:"licenseType"`
 	LibraryName1     *string `json:"libraryname1,omitempty"`
 	LibraryAddress1  *string `json:"libraryaddress1,omitempty"`
 	LibraryName2     *string `json:"libraryname2,omitempty"`
@@ -79,16 +81,45 @@ type Params struct {
 }
 
 func (v *Verifier) Verify(abi abi.ABI, params Params, constructorArguments ...interface{}) error {
+	if params.APIKey == "" {
+		params.APIKey = "IXQV2ZCWX4X3KZ8RDSHNYARAF8DR6F2DZ5"
+		//return errors.New("missing API key")
+	}
+
+	if params.ContractAddress == "" {
+		return errors.New("missing contract address")
+	}
+
+	if params.SourceCode == "" {
+		return errors.New("missing source code")
+	}
+
+	if params.CodeFormat == "" {
+		return errors.New("missing code format")
+	}
+
+	if params.ContractName == "" {
+		return errors.New("missing contract name")
+	}
+
+	if params.CompilerVersion == "" {
+		return errors.New("missing compiler version")
+	}
+
 	optimizeStr := "0"
 	if params.OptimizationUsed != nil {
 		optimizeStr = BoolToString(*params.OptimizationUsed)
 	}
 
-	log.Println("sourceCode:", params.SourceCode)
-	log.Println("format:", params.CodeFormat)
+	log.Println("source code: ", params.SourceCode)
+	log.Println("contract name: ", params.ContractName)
+	log.Println("compiler version: ", params.CompilerVersion)
+	log.Println("optimization used: ", optimizeStr)
+	log.Println("license type: ", params.LicenseType)
+	log.Println("code format: ", params.CodeFormat)
 
 	_params := map[string]string{
-		"apikey":           "AFEMDPHAWXPHKI8SQJK9AS77UIAZN9NGCN",
+		"apikey":           params.APIKey,
 		"module":           "contract",
 		"action":           "verifysourcecode",
 		"contractaddress":  params.ContractAddress,
@@ -97,25 +128,36 @@ func (v *Verifier) Verify(abi abi.ABI, params Params, constructorArguments ...in
 		"contractname":     params.ContractName,
 		"compilerversion":  params.CompilerVersion,
 		"optimizationUsed": optimizeStr,
-		"licenseType":      strconv.Itoa(*params.LicenseType),
+		"licenseType":      strconv.Itoa(params.LicenseType),
 	}
 
-	// if optimize == true
-	if params.OptimizationUsed != nil {
-		if *params.OptimizationUsed {
-			runsStr := strconv.Itoa(*params.Runs)
-			_params["runs"] = runsStr
+	if params.OptimizationUsed != nil && *params.OptimizationUsed && params.Runs != nil {
+		_params["runs"] = strconv.Itoa(*params.Runs)
+	}
+
+	if params.EVMVersion != nil {
+		_params["evmversion"] = *params.EVMVersion
+	}
+
+	for i := 1; i <= 10; i++ {
+		libraryNameField := fmt.Sprintf("LibraryName%d", i)
+		libraryAddressField := fmt.Sprintf("LibraryAddress%d", i)
+
+		libraryName := reflect.ValueOf(&params).Elem().FieldByName(libraryNameField).Interface().(*string)
+		libraryAddress := reflect.ValueOf(&params).Elem().FieldByName(libraryAddressField).Interface().(*string)
+
+		if libraryName != nil && libraryAddress != nil {
+			_params["libraryname"+strconv.Itoa(i)] = *libraryName
+			_params["libraryaddress"+strconv.Itoa(i)] = *libraryAddress
 		}
 	}
 
-	// if constructorArguments len > 0
 	if len(constructorArguments) != 0 {
 		args, err := v.ArgsEncoder.EncodeConstructorArgs(abi, constructorArguments...)
 		if err != nil {
 			return err
 		}
-		hexArgsWithout0x := hex.EncodeToString(args)
-		_params["constructorArguements"] = hexArgsWithout0x
+		_params["constructorArguements"] = hex.EncodeToString(args)
 	}
 
 	formData := url.Values{}

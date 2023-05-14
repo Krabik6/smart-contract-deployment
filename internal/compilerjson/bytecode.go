@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"log"
 	"os/exec"
 )
 
@@ -61,8 +60,6 @@ func (c *Compiler) GetBytecode(inputJSON []byte, contractPath, contractName stri
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse compiler output: %v", err)
 	}
-
-	log.Println(solcOutput.Contracts[contractPath][contractName], "1")
 
 	// Access the ABI of the first contract
 	bytecodeInterface := solcOutput.Contracts[contractPath][contractName].Evm.Bytecode.Object

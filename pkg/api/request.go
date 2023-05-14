@@ -33,7 +33,7 @@ type VerifyRequest struct {
 	OptimizationUsed     *bool           `json:"optimizationUsed,omitempty"`
 	Runs                 *int            `json:"runs,omitempty"`
 	EVMVersion           *string         `json:"evmversion,omitempty"`
-	LicenseType          *int            `json:"licenseType,omitempty"`
+	LicenseType          int             `json:"licenseType"`
 	LibraryName1         *string         `json:"libraryname1,omitempty"`
 	LibraryAddress1      *string         `json:"libraryaddress1,omitempty"`
 	LibraryName2         *string         `json:"libraryname2,omitempty"`

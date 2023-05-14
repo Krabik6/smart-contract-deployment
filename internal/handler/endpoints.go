@@ -39,6 +39,8 @@ func (h *Handler) deploy(c *gin.Context) {
 		return
 	}
 
+	//print bytecode in hex without 0x
+	log.Println(hex.EncodeToString(bytecode))
 	//abi
 	abi, err := h.CompilerJson.GetAbi(input, path, req.ContractName)
 	if err != nil {
@@ -51,6 +53,7 @@ func (h *Handler) deploy(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(200, gin.H{"address": contract})
 }
 
@@ -129,20 +132,32 @@ func (h *Handler) verify(c *gin.Context) {
 	}
 
 	//todo path
-	input, path, err := h.InputGenerator.GenerateJSONInput("smart_contracts/smart.sol", *req.OptimizationUsed, *req.Runs)
+	input, path, err := h.InputGenerator.GenerateJSONInput("smart_contracts/smart.sol", true, 200)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	// input convert to string
+	//// bytecode
+	//bytecode, err := h.CompilerJson.GetBytecode(input, path, req.ContractName)
+	//if err != nil {
+	//	c.JSON(500, gin.H{"error": err.Error()})
+	//	return
+	//}
 
 	//abi
-	abi, err := h.CompilerJson.GetAbi(input, path, req.ContractName)
+	abi, err := h.CompilerJson.GetAbi(input, path, "PublicStorageFuck")
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+
+	bytecode, err := h.CompilerJson.GetBytecode(input, path, "PublicStorageFuck")
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	log.Println(hex.EncodeToString(bytecode))
 
 	params := verify.Params{
 		//APIKey:           "AFEMDPHAWXPHKI8SQJK9AS77UIAZN9NGCN",
