@@ -6,6 +6,7 @@ import (
 
 type Verifier struct {
 	ArgsEncoder ArgsEncoder
+	Params      Params
 }
 
 func NewVerifier(argsEncoder ArgsEncoder) *Verifier {
@@ -14,26 +15,7 @@ func NewVerifier(argsEncoder ArgsEncoder) *Verifier {
 	}
 }
 
-//
-//// Compiler is the interface that wraps the Compile method.
-//type Compiler interface {
-//	EncodeConstructorArgs(sourceCode string, args ...interface{}) ([]byte, error)
-//}
-//
-//type CompilerJson interface {
-//	GetBytecode(inputJSON []byte, contractPath, contractName string) ([]byte, error)
-//	GetAbi(inputJSON []byte, contractPath, contractName string) (abi.ABI, error)
-//}
-
-type ArgsEncoder interface {
-	EncodeConstructorArgs(abi abi.ABI, args ...interface{}) ([]byte, error)
-}
-
 func (v *Verifier) Verify(abi abi.ABI, params Params, constructorArguments ...interface{}) error {
-	err := v.validateParams(params)
-	if err != nil {
-		return err
-	}
 
 	v.logParams(params)
 

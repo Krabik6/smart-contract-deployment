@@ -20,7 +20,11 @@ type BytecodeRequest struct {
 	Runs       int    `json:"runs"`
 }
 
-//Verify(contractAddress, sourceCode, contractName, constructorArguments, licenseType, compilerversion string, optimize bool, runs int) error
+// Verify(contractAddress, sourceCode, contractName, constructorArguments, licenseType, compilerversion string, optimize bool, runs int) error
+type Library struct {
+	Name    *string `json:"name,omitempty"`
+	Address *string `json:"address,omitempty"`
+}
 
 type VerifyRequest struct {
 	ConstructorArguments json.RawMessage `json:"arguments"`
@@ -34,26 +38,7 @@ type VerifyRequest struct {
 	Runs                 *int            `json:"runs,omitempty"`
 	EVMVersion           *string         `json:"evmversion,omitempty"`
 	LicenseType          int             `json:"licenseType"`
-	LibraryName1         *string         `json:"libraryname1,omitempty"`
-	LibraryAddress1      *string         `json:"libraryaddress1,omitempty"`
-	LibraryName2         *string         `json:"libraryname2,omitempty"`
-	LibraryAddress2      *string         `json:"libraryaddress2,omitempty"`
-	LibraryName3         *string         `json:"libraryname3,omitempty"`
-	LibraryAddress3      *string         `json:"libraryaddress3,omitempty"`
-	LibraryName4         *string         `json:"libraryname4,omitempty"`
-	LibraryAddress4      *string         `json:"libraryaddress4,omitempty"`
-	LibraryName5         *string         `json:"libraryname5,omitempty"`
-	LibraryAddress5      *string         `json:"libraryaddress5,omitempty"`
-	LibraryName6         *string         `json:"libraryname6,omitempty"`
-	LibraryAddress6      *string         `json:"libraryaddress6,omitempty"`
-	LibraryName7         *string         `json:"libraryname7,omitempty"`
-	LibraryAddress7      *string         `json:"libraryaddress7,omitempty"`
-	LibraryName8         *string         `json:"libraryname8,omitempty"`
-	LibraryAddress8      *string         `json:"libraryaddress8,omitempty"`
-	LibraryName9         *string         `json:"libraryname9,omitempty"`
-	LibraryAddress9      *string         `json:"libraryaddress9,omitempty"`
-	LibraryName10        *string         `json:"libraryname10,omitempty"`
-	LibraryAddress10     *string         `json:"libraryaddress10,omitempty"`
+	Libraries            []Library       `json:"libraries,omitempty"`
 }
 
 type EncodeFunctionCallRequest struct {

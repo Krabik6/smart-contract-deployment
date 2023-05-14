@@ -2,10 +2,8 @@ package verify
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"log"
-	"reflect"
 	"strconv"
 )
 
@@ -56,17 +54,10 @@ func (v *Verifier) prepareParams(abi abi.ABI, params Params, constructorArgument
 		_params["evmversion"] = *params.EVMVersion
 	}
 
-	for i := 1; i <= 10; i++ {
-		libraryNameField := fmt.Sprintf("LibraryName%d", i)
-		libraryAddressField := fmt.Sprintf("LibraryAddress%d", i)
-
-		libraryName := reflect.ValueOf(&params).Elem().FieldByName(libraryNameField).Interface().(*string)
-		libraryAddress := reflect.ValueOf(&params).Elem().FieldByName(libraryAddressField).Interface().(*string)
-
-		if libraryName != nil && libraryAddress != nil {
-			_params["libraryname"+strconv.Itoa(i)] = *libraryName
-			_params["libraryaddress"+strconv.Itoa(i)] = *libraryAddress
-		}
+	for i, library := range params.Libraries {
+		libraryIndex := i + 1
+		_params["libraryname"+strconv.Itoa(libraryIndex)] = library.Name
+		_params["libraryaddress"+strconv.Itoa(libraryIndex)] = library.Address
 	}
 
 	if len(constructorArguments) != 0 {

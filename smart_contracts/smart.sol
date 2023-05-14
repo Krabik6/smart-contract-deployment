@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 import "smart_contracts/folderTwo/second.sol";
 contract PublicStorageFuck is Second {
     mapping(address => mapping(string => string)) public Storage;
-    uint cost;
+    uint cost = 1676;
     address payable owner = payable(0x53B824334c4462aAd8cf7B31fa2c873F5f438f89);
 //    constructor(uint _cost){
 //        owner = payable(msg.sender);
