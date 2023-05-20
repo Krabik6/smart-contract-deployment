@@ -2,18 +2,22 @@ package deployer
 
 import (
 	"context"
+	"github.com/Krabik6/smart-contract-deployment/internal/eth"
 	"github.com/ethereum/go-ethereum"
 )
 
-func (d *Deployer) EstimateGas(sourceCode string, optimize bool, runs int, args ...interface{}) (int, error) {
-	auth := d.Ethereum.Auth     // auth is a pointer to a TransactOpts struct
-	client := d.Ethereum.Client // client is a pointer to an ethclient.Client struct
-	//todo
-	bytecode := []byte{}
-	//bytecode, err := d.GetBytecode(sourceCode, optimize, runs)
-	//if err != nil {
-	//	return 0, err
-	//}
+func (d *Deployer) EstimateGas(networkName string, network Network, bytecode []byte) (int, error) {
+	_network, err := d.GetNetwork(networkName, network)
+	if err != nil {
+		return 0, err
+	}
+	ethereumClient, err := eth.NewEthereumClient(_network.Provider, _network.PrivateKey)
+	if err != nil {
+		return 0, err
+	}
+
+	auth := ethereumClient.Auth     // auth is a pointer to a TransactOpts struct
+	client := ethereumClient.Client // client is a pointer to an ethclient.Client struct
 
 	estimateGas, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
 		From:     auth.From,

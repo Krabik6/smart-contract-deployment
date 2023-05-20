@@ -24,7 +24,7 @@ func (v *Verifier) prepareRequest(baseURL string, params map[string]string) (*ht
 		"Content-Type": "application/x-www-form-urlencoded",
 	}
 
-	req, err := http.NewRequest("POST", "https://api-testnet.polygonscan.com/api", reqBody)
+	req, err := http.NewRequest("POST", baseURL, reqBody)
 	if err != nil {
 		debug.PrintStack()
 		return nil, err

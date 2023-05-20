@@ -8,7 +8,7 @@
       "content": "// SPDX-License-Identifier: UNLICENSED\r\npragma solidity ^0.8.19;\r\n\r\ncontract third {\r\n    function get() public pure returns (string memory) {\r\n        return \"third\";\r\n    }\r\n}\r\n"
     },
     "smart_contracts/smart.sol": {
-      "content": "// SPDX-License-Identifier: GPL-3.0\r\npragma solidity 0.8.19;\r\nimport \"smart_contracts/folderTwo/second.sol\";\r\ncontract PublicStorageFuck is Second {\r\n    mapping(address => mapping(string => string)) public Storage;\r\n    uint cost;\r\n    address payable owner = payable(0x53B824334c4462aAd8cf7B31fa2c873F5f438f89);\r\n\r\n    function saveData(string memory key, string memory value) public payable{\r\n        require(msg.value >= cost, \"not enough shit\");\r\n        Storage[msg.sender][key] = value;\r\n        owner.transfer(msg.value);\r\n    }\r\n\r\n}"
+      "content": "// SPDX-License-Identifier: GPL-3.0\npragma solidity 0.8.19;\nimport \"smart_contracts/folderTwo/second.sol\";\ncontract PublicStorageFuck is Second {\n    mapping(address => mapping(string => string)) public Storage;\n    uint cost = 12445677;\n    address payable owner = payable(0x204a167f93d8f02758448979E3EA1A8ca41b6c5E);\n//    constructor(uint _cost){\n//        owner = payable(msg.sender);\n//        cost = _cost + 111;\n//\n//    }\n\n    function saveData(string memory key, string memory value) public payable{\n        require(msg.value >= cost, \"not enough shit\");\n        Storage[msg.sender][key] = value;\n        owner.transfer(msg.value);\n\n    }\n\n}"
     }
   },
   "settings": {

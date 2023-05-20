@@ -11,8 +11,12 @@ type AppConfig struct {
 }
 
 type EnvConfig struct {
-	PrivateKey string `env:"PRIVATE_KEY"`
-	Url        string `env:"URL"`
+	MumbaiPrivateKey     string `env:"MUMBAI_PRIVATE_KEY"`
+	MumbaiProvider       string `env:"MUMBAI_PROVIDER"`
+	SepoliaPrivateKey    string `env:"SEPOLIA_PRIVATE_KEY"`
+	SepoliaProvider      string `env:"SEPOLIA_PROVIDER"`
+	BscTestnetPrivateKey string `env:"BSC_TESTNET_PRIVATE_KEY"`
+	BscTestnetProvider   string `env:"BSC_TESTNET_PROVIDER"`
 }
 
 type Server struct {
@@ -47,8 +51,12 @@ func Load() (*Config, error) {
 	}
 
 	envConfig := EnvConfig{
-		PrivateKey: os.Getenv("PRIVATE_KEY"),
-		Url:        os.Getenv("URL"),
+		MumbaiPrivateKey:     os.Getenv("MUMBAI_PRIVATE_KEY"),
+		MumbaiProvider:       os.Getenv("MUMBAI_PROVIDER"),
+		SepoliaPrivateKey:    os.Getenv("SEPOLIA_PRIVATE_KEY"),
+		SepoliaProvider:      os.Getenv("SEPOLIA_PROVIDER"),
+		BscTestnetPrivateKey: os.Getenv("BSC_TESTNET_PRIVATE_KEY"),
+		BscTestnetProvider:   os.Getenv("BSC_TESTNET_PROVIDER"),
 	}
 
 	config := &Config{

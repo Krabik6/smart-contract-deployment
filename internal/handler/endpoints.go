@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/hex"
 	"encoding/json"
+	"github.com/Krabik6/smart-contract-deployment/internal/deployer"
 	"github.com/Krabik6/smart-contract-deployment/internal/verify"
 	"github.com/Krabik6/smart-contract-deployment/pkg/api"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -43,7 +44,12 @@ func (h *Handler) deploy(c *gin.Context) {
 		return
 	}
 
-	contract, err := h.Deployer.Deploy(bytecode, abi, args...)
+	_network := deployer.Network{
+		Provider:   req.Provider,
+		PrivateKey: req.PrivateKey,
+	}
+
+	contract, err := h.Deployer.Deploy(req.NetworkName, _network, bytecode, abi, args...)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -95,7 +101,24 @@ func (h *Handler) estimateGas(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	gas, err := h.Deployer.EstimateGas(req.SourceCode, req.Optimize, req.Runs, req.ConstructorArguments)
+	_network := deployer.Network{
+		Provider:   req.Provider,
+		PrivateKey: req.PrivateKey,
+	}
+
+	input, path, err := h.InputGenerator.GenerateJSONInput("smart_contracts/smart.sol", req.Optimize, req.Runs)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	bytecode, err := h.CompilerJson.GetBytecode(input, path, req.ContractName)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	gas, err := h.Deployer.EstimateGas(req.NetworkName, _network, bytecode)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -165,7 +188,7 @@ func (h *Handler) verify(c *gin.Context) {
 
 	network := verify.Network{
 		Apikey: req.APIKey,
-		Url:    req.APIKey,
+		Url:    req.Url,
 	}
 	err = h.Verifier.Verify(req.NetworkName, network, abi, params, args...)
 	if err != nil {

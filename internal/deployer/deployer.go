@@ -21,18 +21,25 @@ import (
 //}
 
 type Deployer struct {
-	Ethereum *eth.EthereumClient
+	//Ethereum *eth.EthereumClient
+	Networks map[string]Network
 }
 
-func NewDeployer(ethereum *eth.EthereumClient) *Deployer {
+type Network struct {
+	Provider   string
+	PrivateKey string
+}
+
+func NewDeployer(networks map[string]Network) *Deployer {
 	return &Deployer{
-		Ethereum: ethereum,
+		//Ethereum: ethereum,
+		Networks: networks,
 	}
 }
 
-func (d *Deployer) Deploy(bytecode []byte, abi abi.ABI, args ...interface{}) (string, error) {
+func (d *Deployer) Deploy(networkName string, network Network, bytecode []byte, abi abi.ABI, args ...interface{}) (string, error) {
 	// Deploy the contract
-	address, tx, _, err := d.DeployWithArgs(bytecode, abi, args...)
+	address, tx, _, err := d.DeployWithArgs(networkName, network, bytecode, abi, args...)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to deploy contract")
 	}
@@ -71,9 +78,19 @@ func convertAndCheckArgs(args []interface{}, contractAbiJson *abi.ABI) ([]interf
 	return args, nil
 }
 
-func (d *Deployer) DeployWithArgs(bytecode []byte, abi abi.ABI, args ...interface{}) (common.Address, *types.Transaction, *bind.BoundContract, error) {
-	auth := d.Ethereum.Auth     // auth is a pointer to a TransactOpts struct
-	client := d.Ethereum.Client // client is a pointer to an ethclient.Client struct
+func (d *Deployer) DeployWithArgs(networkName string, network Network, bytecode []byte, abi abi.ABI, args ...interface{}) (common.Address, *types.Transaction, *bind.BoundContract, error) {
+	_network, err := d.GetNetwork(networkName, network)
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+
+	ethereumClient, err := eth.NewEthereumClient(_network.Provider, _network.PrivateKey)
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+
+	auth := ethereumClient.Auth     // auth is a pointer to a TransactOpts struct
+	client := ethereumClient.Client // client is a pointer to an ethclient.Client struct
 
 	estimateGas, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
 		From:     auth.From,
@@ -104,6 +121,6 @@ func (d *Deployer) DeployWithArgs(bytecode []byte, abi abi.ABI, args ...interfac
 	if err != nil {
 		return common.Address{}, nil, nil, errors.Wrap(err, "failed to deploy contract")
 	}
-	d.Ethereum.Auth.Nonce.Add(d.Ethereum.Auth.Nonce, big.NewInt(1))
+	ethereumClient.Auth.Nonce.Add(ethereumClient.Auth.Nonce, big.NewInt(1))
 	return address, tx, instance, nil
 }

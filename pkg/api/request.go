@@ -3,6 +3,10 @@ package api
 import "encoding/json"
 
 type DeployRequest struct {
+	PrivateKey  string `json:"privatekey"`
+	Provider    string `json:"provider"`
+	NetworkName string `json:"network"`
+
 	SourceCode           string          `json:"source_code"`
 	ConstructorArguments json.RawMessage `json:"arguments"`
 	Optimize             bool            `json:"optimize"`

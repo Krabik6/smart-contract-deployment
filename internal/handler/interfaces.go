@@ -1,14 +1,15 @@
 package handler
 
 import (
+	"github.com/Krabik6/smart-contract-deployment/internal/deployer"
 	"github.com/Krabik6/smart-contract-deployment/internal/verify"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 
 // Deployer is the interface that wraps the Deploy method.
 type Deployer interface {
-	Deploy(bytecode []byte, abi abi.ABI, args ...interface{}) (string, error)
-	EstimateGas(sourceCode string, optimize bool, runs int, args ...interface{}) (int, error)
+	Deploy(networkName string, network deployer.Network, bytecode []byte, abi abi.ABI, args ...interface{}) (string, error)
+	EstimateGas(networkName string, network deployer.Network, bytecode []byte) (int, error)
 }
 
 // Compiler is the interface that wraps the Compile method.
