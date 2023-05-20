@@ -25,15 +25,12 @@ func (h *Handler) deploy(c *gin.Context) {
 			return
 		}
 	}
-	log.Println(req)
 	//todo path
 	input, path, err := h.InputGenerator.GenerateJSONInput("smart_contracts/smart.sol", req.Optimize, req.Runs)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	log.Println(string(input))
-
 	bytecode, err := h.CompilerJson.GetBytecode(input, path, req.ContractName)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -143,7 +140,6 @@ func (h *Handler) verify(c *gin.Context) {
 	}
 
 	paramsBuilder := verify.NewParamsBuilder(
-		req.APIKey,
 		req.ContractAddress,
 		string(input),
 		req.CodeFormat,
@@ -167,7 +163,11 @@ func (h *Handler) verify(c *gin.Context) {
 		return
 	}
 
-	err = h.Verifier.Verify(abi, params, args...)
+	network := verify.Network{
+		Apikey: req.APIKey,
+		Url:    req.APIKey,
+	}
+	err = h.Verifier.Verify(req.NetworkName, network, abi, params, args...)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

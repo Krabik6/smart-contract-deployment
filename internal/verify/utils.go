@@ -27,14 +27,14 @@ func (v *Verifier) logParams(params Params) {
 	log.Println("code format: ", params.CodeFormat)
 }
 
-func (v *Verifier) prepareParams(abi abi.ABI, params Params, constructorArguments ...interface{}) (map[string]string, error) {
+func (v *Verifier) prepareParams(apiKey string, abi abi.ABI, params Params, constructorArguments ...interface{}) (map[string]string, error) {
 	optimizeStr := "0"
 	if params.OptimizationUsed != nil {
 		optimizeStr = BoolToString(*params.OptimizationUsed)
 	}
 
 	_params := map[string]string{
-		"apikey":           params.APIKey,
+		"apikey":           apiKey,
 		"module":           "contract",
 		"action":           "verifysourcecode",
 		"contractaddress":  params.ContractAddress,

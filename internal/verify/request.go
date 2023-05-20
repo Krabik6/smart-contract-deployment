@@ -10,11 +10,13 @@ import (
 	"runtime/debug"
 )
 
-func (v *Verifier) prepareRequest(params map[string]string) (*http.Request, error) {
+func (v *Verifier) prepareRequest(baseURL string, params map[string]string) (*http.Request, error) {
 	formData := url.Values{}
 	for k, v := range params {
 		formData.Set(k, v)
 	}
+
+	log.Println("BaseURL:", baseURL)
 
 	reqBody := bytes.NewBufferString(formData.Encode())
 

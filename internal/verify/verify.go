@@ -2,29 +2,43 @@ package verify
 
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"log"
 )
 
 type Verifier struct {
 	ArgsEncoder ArgsEncoder
 	Params      Params
+	Networks    map[string]Network
 }
 
-func NewVerifier(argsEncoder ArgsEncoder) *Verifier {
+type Network struct {
+	Apikey string
+	Url    string
+}
+
+func NewVerifier(argsEncoder ArgsEncoder, network map[string]Network) *Verifier {
 	return &Verifier{
 		ArgsEncoder: argsEncoder,
+		Networks:    network,
 	}
 }
 
-func (v *Verifier) Verify(abi abi.ABI, params Params, constructorArguments ...interface{}) error {
+func (v *Verifier) Verify(networkName string, network Network, abi abi.ABI, params Params, constructorArguments ...interface{}) error {
 
 	v.logParams(params)
 
-	_params, err := v.prepareParams(abi, params, constructorArguments...)
+	_network, err := v.GetNetwork(networkName, network)
+	if err != nil {
+		return err
+	}
+	log.Println("Network:", _network)
+
+	_params, err := v.prepareParams(_network.Apikey, abi, params, constructorArguments...)
 	if err != nil {
 		return err
 	}
 
-	req, err := v.prepareRequest(_params)
+	req, err := v.prepareRequest(_network.Url, _params)
 	if err != nil {
 		return err
 	}

@@ -16,50 +16,6 @@ import (
 
 func main() {
 
-	//bytecode, err := compilersjson.GetBytecode("", "input.json")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//log.Println(bytecode)
-
-	//abi, err := compilersjson.GetAbi("")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//log.Println(abi)
-
-	//_mainSolPath := "smart_contracts/smart.sol"
-	//_mainSolName := "PublicStorageFuck"
-	//
-	//c := inputgenerator.NewCompiler()
-	//jsonInput, mainSolPath, err := c.GenerateJSONInput(_mainSolPath, true, 200)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//workDir, err := os.Getwd()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//compilersjson := compilerjson.NewCompiler(workDir, "ethereum/solc:0.8.19")
-	//bytecode, err := compilersjson.GetBytecode(jsonInput, mainSolPath, _mainSolName)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//log.Print(bytecode)
-	//
-	//abi, err := compilersjson.GetAbi(jsonInput, mainSolPath, _mainSolName)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//log.Println("abi: ", abi)
-	//
-	////wait 50 seconds and panic
-	//time.Sleep(50 * time.Second)
-	//
-	//panic("panic")
-
 	cfg, err := config.Load()
 	if err != nil {
 		panic(err)
@@ -73,12 +29,32 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	networks := map[string]verify.Network{
+		"mumbai": {
+			Apikey: "IXQV2ZCWX4X3KZ8RDSHNYARAF8DR6F2DZ5",
+			Url:    "https://api-testnet.polygonscan.com/api",
+		},
+		"mainnet": {
+			Apikey: "PEKY2JR6FTUHD6MJDVQGFTJDASBGSG6BSA",
+			Url:    "https://api.etherscan.io/api",
+		},
+		"polygon": {
+			Apikey: "IXQV2ZCWX4X3KZ8RDSHNYARAF8DR6F2DZ5",
+			Url:    "https://api.polygonscan.com/api",
+		},
+		"goerli": {
+			Apikey: "PEKY2JR6FTUHD6MJDVQGFTJDASBGSG6BSA",
+			Url:    "https://api-goerli.etherscan.io/api",
+		},
+	}
+
 	inputGenerators := inputgenerator.NewInputGenerator()
 	compilersjson := compilerjson.NewCompiler(workDir, "ethereum/solc:0.8.19")
 	argsEncoders := encoder.NewEncoder()
 	compilers := compiler.NewCompiler(workDir, cfg.AppConfig.Image)
 	deployers := deployer.NewDeployer(eth)
-	verifiers := verify.NewVerifier(argsEncoders)
+	verifiers := verify.NewVerifier(argsEncoders, networks)
 	handlers := handler.NewHandler(deployers, compilers, verifiers, argsEncoders, compilersjson, inputGenerators)
 
 	srv := apiserver.NewServer()

@@ -3,7 +3,7 @@ package verify
 import "errors"
 
 type Params struct {
-	APIKey           string
+	//APIKey           string
 	ContractAddress  string
 	SourceCode       string
 	CodeFormat       string
@@ -21,10 +21,9 @@ type Library struct {
 	Address string
 }
 
-func NewParamsBuilder(apiKey, contractAddress, sourceCode, codeFormat, contractName, compilerVersion string, licenseType int) *ParamsBuilder {
+func NewParamsBuilder(contractAddress, sourceCode, codeFormat, contractName, compilerVersion string, licenseType int) *ParamsBuilder {
 	return &ParamsBuilder{
 		params: Params{
-			APIKey:          apiKey,
 			ContractAddress: contractAddress,
 			SourceCode:      sourceCode,
 			CodeFormat:      codeFormat,
@@ -64,10 +63,10 @@ func (pb *ParamsBuilder) Build() (Params, error) {
 }
 
 func validateParams(params Params) error {
-	if params.APIKey == "" {
-		params.APIKey = "IXQV2ZCWX4X3KZ8RDSHNYARAF8DR6F2DZ5"
-		return errors.New("missing api key")
-	}
+	//if params.APIKey == "" {
+	//	params.APIKey = "IXQV2ZCWX4X3KZ8RDSHNYARAF8DR6F2DZ5"
+	//	return errors.New("missing api key")
+	//}
 
 	if params.ContractAddress == "" {
 		return errors.New("missing contract address")

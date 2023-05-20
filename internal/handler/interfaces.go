@@ -30,7 +30,7 @@ type ArgsEncoder interface {
 
 // Verifier is the interface that wraps the Verify method.
 type Verifier interface {
-	Verify(abi abi.ABI, params verify.Params, constructorArguments ...interface{}) error
+	Verify(networkName string, network verify.Network, abi abi.ABI, params verify.Params, constructorArguments ...interface{}) error
 }
 
 type InputGenerator interface {

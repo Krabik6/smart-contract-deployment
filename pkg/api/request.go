@@ -27,8 +27,11 @@ type Library struct {
 }
 
 type VerifyRequest struct {
+	APIKey      string `json:"apikey"`
+	Url         string `json:"url"`
+	NetworkName string `json:"network"`
+
 	ConstructorArguments json.RawMessage `json:"arguments"`
-	APIKey               string          `json:"apikey"`
 	ContractAddress      string          `json:"contractaddress"`
 	SourceCode           string          `json:"sourceCode"`
 	CodeFormat           string          `json:"codeformat"`
